@@ -27,7 +27,7 @@ app.listen(port);
 app.post('/', async (req, res) => {
     const {message} = req.body;
     console.log(message);
-    console.log('testing');
+    console.log('test');
     // const response = await openai.createCompletion({
         // model: "text-davinci-003",
         // prompt: "Say this is a test",
