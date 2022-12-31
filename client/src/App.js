@@ -6,54 +6,82 @@ import { useState } from 'react';
 function App() {
   const [chatLog, setChatLog] = useState([{
     user: 'gpt',
-    message: 'Let me help you with your English!',
-  }, {
-    user: 'me',
-    message: 'I want to learn English!'
+    message: 'Im your GPT-3 chatbot. Ask me anything!',
   }]);
-  const [input, setInput] = useState("");
 
-  async function handleSubmit(e){
+  const [details, setDetails] = useState({
+    input: "",
+    temp: 0.5,
+  });
+
+  function clearChat(){
+    setChatLog([]);
+  }
+
+  function handleChange(evt) {
+    console.log(evt.target);
+    const name = evt.target.name;
+    const value = evt.target.value;
+
+    setDetails((prevDetails) => {
+      return { ...prevDetails, [name]: value };
+    });
+    console.log(details);
+  }
+
+  async function handleSubmit(e) {
     e.preventDefault();
     console.log("submitting");
-    setChatLog([...chatLog, {user: 'me', message: `${input}`}]);
-    setInput("");
+    setChatLog([...chatLog, { user: "me", message: `${details.input}` }]);
+    
     // fetch response from the api combining the chat log array of messages and send it to the localhost:3000 as a post
-    const response = await fetch('http://localhost:3080/', {
-      method: 'POST',
+    const response = await fetch("http://localhost:3080/", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        message: chatLog.map((message) => message.message).join(' ')
-      })
+        message: chatLog.map((message) => message.message).join(" "),
+      }),
     });
     const data = await response.json();
-    console.log(data);
-    setChatLog([...chatLog, {user: 'gpt', message: data.data.choices[0].text}]);
+    console.log(data.message);
+    setChatLog([...chatLog, { user: "gpt", message: `${data.message}` }]);
+    e.target.reset();
   }
+
   return (
     <div className="App">
       <aside className="sidemenu">
         <h2>Sidemenu</h2>
-        <div className="sidemenu-newchat">
-          + Add
+        <div className="sidemenu-newchat" onClick={clearChat}>
+          + New 
         </div>
       </aside>
       <section className="mainmenu">
-        <h2>Mainmenu</h2>
+        <h2>AI Companion</h2>
         <div className="chat-log">
           {chatLog.map((message, index) => (
             <ChatMessage key={index} message={message}/>
           ))}
         </div>
         <div className="mainmenu-chat">
-          <form onSubmit={handleSubmit}>
-            <input
-              rows="1"
-              value={input}
-              onChange={(e)=> setInput(e.target.value)}></input>
-          </form>
+        <form onSubmit={handleSubmit}>
+          <input
+            rows="1"
+            name="input"
+            onChange={handleChange}
+          ></input>
+          <input
+            name="temp"
+            onChange={handleChange}
+            type="range"
+            min="0.1"
+            max="1"
+            step="0.1"
+          ></input>
+        </form>
+          
         </div>
       </section>
       
